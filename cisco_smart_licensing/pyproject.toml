@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cisco-smart-licensing"
+version = "0.1.0"
+description = "Utility for managing Cisco Smart Licensing"
+authors = ["Travis Johnson"]
+license = "None"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+django-restframework = "^0.0.1"
+django-pivot = "^1.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
