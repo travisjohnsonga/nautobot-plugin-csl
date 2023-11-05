@@ -22,7 +22,7 @@ class CircuitContent(TemplateExtension):
         """
         return [
             {
-                "title": "Example App Tab",
+                "title": "Cisco Smart Licensing",
                 "url": reverse("plugins:example_plugin:circuit_detail_tab", kwargs={"pk": self.context["object"].pk}),
             },
         ]
@@ -50,10 +50,7 @@ class DeviceContent(TemplateExtension):
                 "title": "Example App Tab 1",
                 "url": reverse("plugins:example_plugin:device_detail_tab_1", kwargs={"pk": self.context["object"].pk}),
             },
-            {
-                "title": "Example App Tab 2",
-                "url": reverse("plugins:example_plugin:device_detail_tab_2", kwargs={"pk": self.context["object"].pk}),
-            },
+          
         ]
 
     def full_width_page(self):

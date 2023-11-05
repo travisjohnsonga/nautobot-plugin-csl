@@ -2,24 +2,11 @@ from django.shortcuts import HttpResponse, render
 from django.views.generic import View
 import requests, json, datetime
 
-import yaml
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Q
-from django.shortcuts import redirect, render
-from django.urls import reverse
-
-from django.utils.html import format_html
-from django.utils.timezone import make_aware
+from django.shortcuts import HttpResponse, render
 from django.views.generic import View
-from django_pivot.pivot import pivot
+
 from nautobot.apps import views
-from nautobot.core.views import generic
-from nautobot.core.views.mixins import ObjectPermissionRequiredMixin, PERMISSIONS_ACTION_MAP
-from nautobot.dcim.models import Device
-from nautobot.extras.models import Job, JobResult
-#from rest_framework.decorators import action
-#from rest_framework.response import Response
+from nautobot.dcim.models import Location
 class csl:
     def __init__(self, client_id = None, client_secret = None):
         self.client_id = client_id
@@ -28,7 +15,7 @@ class csl:
         self.oauth_token_type = None
         self.oauth_token_expires = None
         self.token_timestamp = None
-        self.account = ''
+        self.account = 'chs.net'
     def GetAuthToken(self):
         url = 'https://cloudsso.cisco.com/as/token.oauth2'
         payload = 'grant_type=client_credentials&client_id=' + str(self.client_id) + '&client_secret=' + str(self.client_secret)
@@ -138,27 +125,47 @@ class csl:
         'Content-Type': 'application/json',
         }
         response = requests.request("POST", url, headers=headers, data=payload)
-        print(response.content)
-        json_response = response.json()['licenses']
-        print(json_response)
-        return json_response
+        if response.status_code == 200:
+            json_response = response.json()['licenses']
+            return json_response
+        else:
+            return None
 
-class CiscoSmartLicenseLocationUIViewSet(views.ObjectDetailViewMixin,
-    views.ObjectDestroyViewMixin,
-    views.ObjectBulkDestroyViewMixin,
-    views.ObjectListViewMixin,
-    ):
+class LocationSmartLicenseTab(views.ObjectView):
+    """
+    This view's template extends the circuit detail template,
+    making it suitable to show as a tab on the circuit detail page.
 
-    #@action(detail=True, methods=["get"])
-    def locatontab(self,request, pk, *args, **kwargs):
-        smart_license = csl()
-        smart_license.client_id = 'id'
-        smart_license.client_secret = 'secret'
+    Views that are intended to be for an object detail tab's content rendering must
+    always inherit from nautobot.apps.views.ObjectView.
+    """
+    
+  
+    queryset = Location.objects.all()
+    template_name = "cisco_smart_licensing/location_tab.html"
+    print(queryset)
+    def get_extra_context(self, request, instance):
 
-        smart_license.GetAuthToken()
-        licenses = smart_license.GetVALicense(virt_acct=['va'])
-        
-        context = {}
-        context['licenses'] = licenses
-        context["active_tab"] = request.GET.get("tab")
-        return render(request, "cisco_smart_licensing/location_tab.html")
+        print(f'UUID PK IS {self.kwargs["pk"]}')
+        print(f'INSTANCE IS {instance}')
+        print(f'REQUEST IS {request}')
+        print(f'PK IS {self.kwargs}')
+
+        loc_data = Location.objects.get(pk=self.kwargs["pk"])
+        location_virtual_account = f'{loc_data.cf["state"]}{loc_data.facility}'
+        client_id='dd65c832-68c3-4ffc-add0-9ce1ccb6d31e'
+        client_secret = '3b735290-286d-40a1-a4c4-af85c77baa16'
+
+        cslclient = csl()
+        cslclient.client_id = client_id
+        cslclient.client_secret = client_secret
+        virtual_accounts =[]
+        virtual_accounts.append(location_virtual_account)
+        print(virtual_accounts)
+        cslclient.GetAuthToken()
+        licenses = cslclient.GetVALicense(virtual_accounts)
+
+        print(licenses)
+        return {
+            "licenses": licenses,
+        }
