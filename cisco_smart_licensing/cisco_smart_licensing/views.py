@@ -4,18 +4,28 @@ import requests, json, datetime
 
 from django.shortcuts import HttpResponse, render
 from django.views.generic import View
+from django.conf import settings
 
 from nautobot.apps import views
 from nautobot.dcim.models import Location
+
+PLUGIN_CFG = settings.PLUGINS_CONFIG.get("CISCO_SMART_LICENSING", {})
+
 class csl:
+    
+
+     
+    
     def __init__(self, client_id = None, client_secret = None):
-        self.client_id = client_id
-        self.client_secret = client_secret
+        self.client_id = PLUGIN_CFG.get("SMART_LICENSE_CLIENT_ID")
+        self.client_secret = PLUGIN_CFG.get("SMART_LICENSE_CLIENT_SECRET")
         self.oauth_token = None
         self.oauth_token_type = None
         self.oauth_token_expires = None
         self.token_timestamp = None
-        self.account = 'chs.net'
+        self.account = PLUGIN_CFG.get("SMART_LICENSE_ACCOUNT")
+        self.source_virtual_account = PLUGIN_CFG.get("SMART_LICENSE_SOURCE_VIRTUAL_ACCOUNT")
+
     def GetAuthToken(self):
         url = 'https://cloudsso.cisco.com/as/token.oauth2'
         payload = 'grant_type=client_credentials&client_id=' + str(self.client_id) + '&client_secret=' + str(self.client_secret)
@@ -153,12 +163,8 @@ class LocationSmartLicenseTab(views.ObjectView):
 
         loc_data = Location.objects.get(pk=self.kwargs["pk"])
         location_virtual_account = f'{loc_data.cf["state"]}{loc_data.facility}'
-        client_id='dd65c832-68c3-4ffc-add0-9ce1ccb6d31e'
-        client_secret = '3b735290-286d-40a1-a4c4-af85c77baa16'
-
+       
         cslclient = csl()
-        cslclient.client_id = client_id
-        cslclient.client_secret = client_secret
         virtual_accounts =[]
         virtual_accounts.append(location_virtual_account)
         print(virtual_accounts)

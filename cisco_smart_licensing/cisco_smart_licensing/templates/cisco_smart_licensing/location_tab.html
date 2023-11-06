@@ -1,5 +1,5 @@
 {% extends 'dcim/location.html' %}
-
+{% load mathfilters %}
 {% block content %}
     <h2>Cisco Smart Licensing</h2>
     {% if licenses %}
@@ -21,7 +21,7 @@
           </td>
           <td>{{lic.quantity}}</td>
           <td>{{lic.inUse}}</td>
-          <td>{{lic.quantity}}</td>
+          <td>{{lic.quantity|sub:lic.inUse}}</td>
         </tr>
         {% endfor %}
     </table>

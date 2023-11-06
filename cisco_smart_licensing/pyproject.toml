@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
+django-mathfilters = "^1.0.0"
 
 
 [build-system]
