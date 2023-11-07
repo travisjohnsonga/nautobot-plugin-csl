@@ -49,4 +49,4 @@ Licenses from the `SMART_LICENSE_SOURCE_VIRTUAL_ACCOUNT` and move them to the fa
 ### Generate Smart Tokens
 
 This generates Smart Licenses and stores in a location custom field call `SMART_LICENSE_TOKEN`
-This is mainly for use with ansible to handle smart licensing, but also to allow staff to access a token without having to have access to the smart license portal.
+This is mainly for use with ansible to handle smart licensing, but also to allow staff to access a token without having to have access to the smart license portal.  `SMART_LICENSE_LOCATION_TYPES` can be used in instances where you might have a location type of a Hub location type with Branches, where the branchs are associated with the parent hub location virtual account and therefore would not need to be processessed.
